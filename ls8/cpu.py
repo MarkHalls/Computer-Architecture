@@ -119,5 +119,9 @@ class CPU:
                 return
             elif IR == LDI:
                 self.reg[operand_a] = operand_b
+                self.pc += 3
+            elif IR == PRN:
+                print(self.reg[operand_a])
+                self.pc += 2
             else:
                 print(f"Invalid instruction {IR}")
