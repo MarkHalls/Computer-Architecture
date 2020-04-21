@@ -107,9 +107,17 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        IR = self.ram[self.pc]
+        running = True
 
-        operand_a = self.ram_read(self.pc + 1)
-        operand_b = self.ram_read(self.pc + 2)
+        while running:
+            IR = self.ram[self.pc]
+            operand_a = self.ram_read(self.pc + 1)
+            operand_b = self.ram_read(self.pc + 2)
 
-        pass
+            if IR == HLT:
+                running = False
+                return
+            elif IR == LDI:
+                self.reg[operand_a] = operand_b
+            else:
+                print(f"Invalid instruction {IR}")
