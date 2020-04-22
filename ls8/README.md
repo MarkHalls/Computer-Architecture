@@ -60,6 +60,19 @@ but you'll have to implement those three above instructions first!
 ## Step 0: IMPORTANT: inventory what is here!
 
 * Make a list of files here.
+ls8.py - main program. Creates a CPU and loads/runs external code
+cpu.py - cpu class, contains load, run, the ALU and trace
+examples folder - a list of files containing code we can have our program run.
+
+implemented: 
+cpu.py: 
+  PC
+  hardcoded program
+  add op
+  trace
+
+ls8.py:
+  
 * Write a short 3-10-word description of what each file does.
 * Note what has been implemented, and what hasn't.
 * Read this whole file.
