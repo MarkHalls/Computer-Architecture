@@ -1,6 +1,7 @@
 """CPU functionality."""
 
 import sys
+import re
 
 ADD = 0b10100000
 SUB = 0b10100001
@@ -49,22 +50,16 @@ class CPU:
         """Load a program into memory."""
 
         address = 0
+        program_filename = sys.argv[1]
 
-        # For now, we've just hardcoded a program:
-
-        program = [
-            # From print8.ls8
-            0b10000010,  # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111,  # PRN R0
-            0b00000000,
-            0b00000001,  # HLT
-        ]
-
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+        with open(program_filename) as f:
+            regex = re.compile("\d+")
+            for line in f:
+                matched = regex.match(line)
+                if matched:
+                    instruction = int(matched.group(), 2)
+                    self.ram[address] = instruction
+                    address += 1
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -72,6 +67,8 @@ class CPU:
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
         # elif op == "SUB": etc
+        elif op == "MUL":
+            self.reg[reg_a] = self.reg[reg_a] * self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -110,7 +107,9 @@ class CPU:
         running = True
 
         while running:
-            IR = self.ram[self.pc]
+            IR = self.ram_read(self.pc)
+            inst_len = ((IR & 0b11000000) >> 6) + 1
+
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
 
@@ -119,9 +118,11 @@ class CPU:
                 return
             elif IR == LDI:
                 self.reg[operand_a] = operand_b
-                self.pc += 3
             elif IR == PRN:
                 print(self.reg[operand_a])
-                self.pc += 2
+            elif IR == MUL:
+                self.alu("MUL", operand_a, operand_b)
             else:
                 print(f"Invalid instruction {IR}")
+
+            self.pc += inst_len
