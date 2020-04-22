@@ -45,7 +45,8 @@ class CPU:
         self.ram = [0] * 255
         self.reg = [0] * 8
         self.pc = 0
-        self.reg[7] = 0xF4  # stack pointer
+        self.stack_pointer = 7
+        self.reg[self.stack_pointer] = 0xF4  # stack pointer
         self.running = False
         self.branchtable = {}
         self.branchtable[ADD] = self.handle_ADD
@@ -191,12 +192,12 @@ class CPU:
         pass
 
     def handle_PUSH(self, operand_a, _):
-        self.reg[7] -= 1
-        self.ram[self.reg[7]] = self.reg[operand_a]
+        self.reg[self.stack_pointer] -= 1
+        self.ram[self.reg[self.stack_pointer]] = self.reg[operand_a]
 
     def handle_POP(self, operand_a, __):
-        self.reg[operand_a] = self.ram[self.reg[7]]
-        self.reg[7] += 1
+        self.reg[operand_a] = self.ram[self.reg[self.stack_pointer]]
+        self.reg[self.stack_pointer] += 1
 
     def handle_PRA(self, operand_a, operand_b):
         pass
