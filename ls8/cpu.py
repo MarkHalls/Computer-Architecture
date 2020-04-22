@@ -45,6 +45,31 @@ class CPU:
         self.ram = [0] * 255
         self.reg = [0] * 8
         self.pc = 0
+        self.running = False
+        self.branchtable = {}
+        self.branchtable[ADD] = self.handle_ADD
+        self.branchtable[SUB] = self.handle_SUB
+        self.branchtable[MUL] = self.handle_MUL
+        self.branchtable[DIV] = self.handle_DIV
+        self.branchtable[MOD] = self.handle_MOD
+        self.branchtable[INC] = self.handle_INC
+        self.branchtable[DEC] = self.handle_DEC
+        self.branchtable[CMP] = self.handle_CMP
+        self.branchtable[AND] = self.handle_AND
+        self.branchtable[NOT] = self.handle_NOT
+        self.branchtable[OR] = self.handle_OR
+        self.branchtable[XOR] = self.handle_XOR
+        self.branchtable[SHL] = self.handle_SHL
+        self.branchtable[SHR] = self.handle_SHR
+        self.branchtable[NOP] = self.handle_NOP
+        self.branchtable[HLT] = self.handle_HLT
+        self.branchtable[LDI] = self.handle_LDI
+        self.branchtable[LD] = self.handle_LD
+        self.branchtable[ST] = self.handle_ST
+        self.branchtable[PUSH] = self.handle_PUSH
+        self.branchtable[POP] = self.handle_POP
+        self.branchtable[PRN] = self.handle_PRN
+        self.branchtable[PRA] = self.handle_PRA
 
     def load(self):
         """Load a program into memory."""
@@ -102,27 +127,89 @@ class CPU:
     def ram_write(self, address, value):
         self.ram[address] = value
 
+    def handle_ADD(self, operand_a, operand_b):
+        pass
+
+    def handle_SUB(self, operand_a, operand_b):
+        pass
+
+    def handle_HLT(self, _, __):
+        self.running = False
+
+    def handle_LDI(self, operand_a, operand_b):
+        self.reg[operand_a] = operand_b
+
+    def handle_PRN(self, operand_a, _):
+        print(self.reg[operand_a])
+
+    def handle_MUL(self, operand_a, operand_b):
+        self.alu("MUL", operand_a, operand_b)
+
+    def handle_DIV(self, operand_a, operand_b):
+        pass
+
+    def handle_MOD(self, operand_a, operand_b):
+        pass
+
+    def handle_INC(self, operand_a, operand_b):
+        pass
+
+    def handle_DEC(self, operand_a, operand_b):
+        pass
+
+    def handle_CMP(self, operand_a, operand_b):
+        pass
+
+    def handle_AND(self, operand_a, operand_b):
+        pass
+
+    def handle_NOT(self, operand_a, operand_b):
+        pass
+
+    def handle_OR(self, operand_a, operand_b):
+        pass
+
+    def handle_XOR(self, operand_a, operand_b):
+        pass
+
+    def handle_SHL(self, operand_a, operand_b):
+        pass
+
+    def handle_SHR(self, operand_a, operand_b):
+        pass
+
+    def handle_NOP(self, operand_a, operand_b):
+        pass
+
+    def handle_LD(self, operand_a, operand_b):
+        pass
+
+    def handle_ST(self, operand_a, operand_b):
+        pass
+
+    def handle_PUSH(self, operand_a, operand_b):
+        pass
+
+    def handle_POP(self, operand_a, operand_b):
+        pass
+
+    def handle_PRA(self, operand_a, operand_b):
+        pass
+
     def run(self):
         """Run the CPU."""
-        running = True
+        self.running = True
 
-        while running:
+        while self.running:
             IR = self.ram_read(self.pc)
             inst_len = ((IR & 0b11000000) >> 6) + 1
 
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
 
-            if IR == HLT:
-                running = False
-                return
-            elif IR == LDI:
-                self.reg[operand_a] = operand_b
-            elif IR == PRN:
-                print(self.reg[operand_a])
-            elif IR == MUL:
-                self.alu("MUL", operand_a, operand_b)
-            else:
+            try:
+                self.branchtable[IR](operand_a, operand_b)
+            except:
                 print(f"Invalid instruction {IR}")
 
             self.pc += inst_len
