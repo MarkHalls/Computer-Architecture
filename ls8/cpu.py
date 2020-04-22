@@ -45,6 +45,13 @@ class CPU:
         self.ram = [0] * 255
         self.reg = [0] * 8
         self.pc = 0
+        self.stack_start = 0xF3
+        """ 
+        stack_end is the length of our stack. 
+        Updated to be the closest address to the end of the program on load
+        """
+        self.stack_end = 0x01
+        self.stack_pointer = self.stack_start
         self.running = False
         self.branchtable = {}
         self.branchtable[ADD] = self.handle_ADD
@@ -85,6 +92,8 @@ class CPU:
                     instruction = int(matched.group(), 2)
                     self.ram[address] = instruction
                     address += 1
+
+        self.stack_end = address
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
