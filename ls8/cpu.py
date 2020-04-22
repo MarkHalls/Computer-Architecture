@@ -45,13 +45,7 @@ class CPU:
         self.ram = [0] * 255
         self.reg = [0] * 8
         self.pc = 0
-        self.stack_start = 0xF3
-        """ 
-        stack_end is the length of our stack. 
-        Updated to be the closest address to the end of the program on load
-        """
-        self.stack_end = 0x01
-        self.stack_pointer = self.stack_start
+        self.reg[7] = 0xF4  # stack pointer
         self.running = False
         self.branchtable = {}
         self.branchtable[ADD] = self.handle_ADD
@@ -197,17 +191,12 @@ class CPU:
         pass
 
     def handle_PUSH(self, operand_a, _):
-        if self.stack_pointer is not self.stack_end:
-            self.stack_pointer -= 1
-            self.ram[self.stack_pointer] = self.reg[operand_a]
-        else:
-            print("Error: Stack Overflow")
-            sys.exit()
+        self.reg[7] -= 1
+        self.ram[self.reg[7]] = self.reg[operand_a]
 
     def handle_POP(self, operand_a, __):
-        self.reg[operand_a] = self.ram[self.stack_pointer]
-        if self.stack_pointer is not self.stack_start:
-            self.stack_pointer += 1
+        self.reg[operand_a] = self.ram[self.reg[7]]
+        self.reg[7] += 1
 
     def handle_PRA(self, operand_a, operand_b):
         pass
