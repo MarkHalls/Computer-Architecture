@@ -196,11 +196,18 @@ class CPU:
     def handle_ST(self, operand_a, operand_b):
         pass
 
-    def handle_PUSH(self, operand_a, operand_b):
-        pass
+    def handle_PUSH(self, operand_a, _):
+        if self.stack_pointer is not self.stack_end:
+            self.stack_pointer -= 1
+            self.ram[self.stack_pointer] = self.reg[operand_a]
+        else:
+            print("Error: Stack Overflow")
+            sys.exit()
 
-    def handle_POP(self, operand_a, operand_b):
-        pass
+    def handle_POP(self, operand_a, __):
+        self.reg[operand_a] = self.ram[self.stack_pointer]
+        if self.stack_pointer is not self.stack_start:
+            self.stack_pointer += 1
 
     def handle_PRA(self, operand_a, operand_b):
         pass
@@ -215,7 +222,6 @@ class CPU:
 
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
-
             try:
                 self.branchtable[IR](operand_a, operand_b)
             except:
