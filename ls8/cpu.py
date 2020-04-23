@@ -218,8 +218,6 @@ class CPU:
     def handle_RET(self, _, __):
         register = 0
         self.handle_POP(register, __)
-        # return_addr = self.ram[self.reg[self.stack_pointer]]
-        # self.reg[self.stack_pointer] += 1
         self.pc = self.reg[register]
 
     # review interview questions
