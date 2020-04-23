@@ -36,6 +36,9 @@ POP = 0b01000110
 PRN = 0b01000111
 PRA = 0b01001000
 
+CALL = 0b01010000
+RET = 0b00010001
+
 
 class CPU:
     """Main CPU class."""
@@ -72,6 +75,8 @@ class CPU:
         self.branchtable[POP] = self.handle_POP
         self.branchtable[PRN] = self.handle_PRN
         self.branchtable[PRA] = self.handle_PRA
+        self.branchtable[CALL] = self.handle_CALL
+        self.branchtable[RET] = self.handle_RET
 
     def load(self):
         """Load a program into memory."""
@@ -132,7 +137,7 @@ class CPU:
         self.ram[address] = value
 
     def handle_ADD(self, operand_a, operand_b):
-        pass
+        self.alu("ADD", operand_a, operand_b)
 
     def handle_SUB(self, operand_a, operand_b):
         pass
@@ -202,6 +207,22 @@ class CPU:
     def handle_PRA(self, operand_a, operand_b):
         pass
 
+    def handle_CALL(self, operand_a, _):
+        return_addr = self.pc + 2
+        self.reg[self.stack_pointer] -= 1
+        self.ram[self.reg[self.stack_pointer]] = return_addr
+
+        dest_addr = self.reg[operand_a]
+        self.pc = dest_addr
+
+    def handle_RET(self, _, __):
+        register = 0
+        self.handle_POP(register, __)
+        # return_addr = self.ram[self.reg[self.stack_pointer]]
+        # self.reg[self.stack_pointer] += 1
+        self.pc = self.reg[register]
+
+    # review interview questions
     def run(self):
         """Run the CPU."""
         self.running = True
@@ -209,12 +230,14 @@ class CPU:
         while self.running:
             IR = self.ram_read(self.pc)
             inst_len = ((IR & 0b11000000) >> 6) + 1
+            incr_pc = (IR & 0b10000) >> 4  # returns true if IR will modify pc
 
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
             try:
                 self.branchtable[IR](operand_a, operand_b)
             except:
-                print(f"Invalid instruction {IR}")
-
-            self.pc += inst_len
+                print(f"Invalid instruction {bin(IR)}")
+                sys.exit()
+            if not incr_pc == 1:
+                self.pc += inst_len
