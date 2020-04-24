@@ -161,6 +161,24 @@ class CPU:
                 self.flags[self.flag_gt] = 0
                 self.flags[self.flag_equal] = 0
 
+        elif op == "AND":
+            self.reg[reg_a] = self.reg[reg_a] & self.reg[reg_a]
+        elif op == "OR":
+            self.reg[reg_a] = self.reg[reg_a] | self.reg[reg_a]
+        elif op == "XOR":
+            self.reg[reg_a] = self.reg[reg_a] ^ self.reg[reg_a]
+        elif op == "NOT":
+            self.reg[reg_a] = ~self.reg[reg_a]
+        elif op == "SHL":
+            self.reg[reg_a] = self.reg[reg_a] << self.reg[reg_a]
+        elif op == "SHR":
+            self.reg[reg_a] = self.reg[reg_a] >> self.reg[reg_a]
+
+        elif op == "MOD":
+            if self.reg[reg_b] == 0:
+                print("Error: Divide by Zero")
+                sys.exit()
+            self.reg[reg_a] = self.reg[reg_a] % self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
