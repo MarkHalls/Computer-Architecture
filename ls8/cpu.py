@@ -4,6 +4,7 @@ import sys
 import re
 
 ADD = 0b10100000
+ADDI = 0b11001111
 SUB = 0b10100001
 MUL = 0b10100010
 DIV = 0b10100011
@@ -93,6 +94,7 @@ class CPU:
         self.running = False
         self.branchtable = {}
         self.branchtable[ADD] = self.handle_ADD
+        self.branchtable[ADDI] = self.handle_ADDI
         self.branchtable[SUB] = self.handle_SUB
         self.branchtable[MUL] = self.handle_MUL
         self.branchtable[DIV] = self.handle_DIV
@@ -212,78 +214,78 @@ class CPU:
     def ram_write(self, address, value):
         self.ram[address] = value
 
-    def handle_ADD(self, operand_a, operand_b):
+    def handle_ADD(self, operand_a, operand_b, _):
         self.alu("ADD", operand_a, operand_b)
 
-    def handle_SUB(self, operand_a, operand_b):
+    def handle_SUB(self, operand_a, operand_b, _):
         pass
 
-    def handle_HLT(self, _, __):
+    def handle_HLT(self, _, _2, _3):
         self.running = False
 
-    def handle_LDI(self, operand_a, operand_b):
+    def handle_LDI(self, operand_a, operand_b, _):
         self.reg[operand_a] = operand_b
 
-    def handle_PRN(self, operand_a, _):
+    def handle_PRN(self, operand_a, _, _2):
         print(self.reg[operand_a])
 
-    def handle_MUL(self, operand_a, operand_b):
+    def handle_MUL(self, operand_a, operand_b, _):
         self.alu("MUL", operand_a, operand_b)
 
-    def handle_DIV(self, operand_a, operand_b):
+    def handle_DIV(self, operand_a, operand_b, _):
         pass
 
-    def handle_MOD(self, operand_a, operand_b):
+    def handle_MOD(self, operand_a, operand_b, _):
         pass
 
-    def handle_INC(self, operand_a, operand_b):
+    def handle_INC(self, operand_a, operand_b, _):
         pass
 
-    def handle_DEC(self, operand_a, operand_b):
+    def handle_DEC(self, operand_a, operand_b, _):
         pass
 
-    def handle_CMP(self, operand_a, operand_b):
+    def handle_CMP(self, operand_a, operand_b, _):
         self.alu("CMP", operand_a, operand_b)
 
-    def handle_AND(self, operand_a, operand_b):
+    def handle_AND(self, operand_a, operand_b, _):
         pass
 
-    def handle_NOT(self, operand_a, operand_b):
+    def handle_NOT(self, operand_a, operand_b, _):
         pass
 
-    def handle_OR(self, operand_a, operand_b):
+    def handle_OR(self, operand_a, operand_b, _):
         pass
 
-    def handle_XOR(self, operand_a, operand_b):
+    def handle_XOR(self, operand_a, operand_b, _):
         pass
 
-    def handle_SHL(self, operand_a, operand_b):
+    def handle_SHL(self, operand_a, operand_b, _):
         pass
 
-    def handle_SHR(self, operand_a, operand_b):
+    def handle_SHR(self, operand_a, operand_b, _):
         pass
 
-    def handle_NOP(self, operand_a, operand_b):
+    def handle_NOP(self, operand_a, operand_b, _):
         pass
 
-    def handle_LD(self, operand_a, operand_b):
+    def handle_LD(self, operand_a, operand_b, _):
         pass
 
-    def handle_ST(self, operand_a, operand_b):
+    def handle_ST(self, operand_a, operand_b, _):
         pass
 
-    def handle_PUSH(self, operand_a, _):
+    def handle_PUSH(self, operand_a, _, _2):
         self.reg[self.stack_pointer] -= 1
         self.ram[self.reg[self.stack_pointer]] = self.reg[operand_a]
 
-    def handle_POP(self, operand_a, __):
+    def handle_POP(self, operand_a, _, _2):
         self.reg[operand_a] = self.ram[self.reg[self.stack_pointer]]
         self.reg[self.stack_pointer] += 1
 
-    def handle_PRA(self, operand_a, operand_b):
+    def handle_PRA(self, operand_a, operand_b, _):
         pass
 
-    def handle_CALL(self, operand_a, _):
+    def handle_CALL(self, operand_a, _, _2):
         return_addr = self.pc + 2
         self.reg[self.stack_pointer] -= 1
         self.ram[self.reg[self.stack_pointer]] = return_addr
@@ -291,25 +293,28 @@ class CPU:
         dest_addr = self.reg[operand_a]
         self.pc = dest_addr
 
-    def handle_RET(self, _, __):
+    def handle_RET(self, _, _2, _3):
         register = 0
-        self.handle_POP(register, __)
+        self.handle_POP(register, _2)
         self.pc = self.reg[register]
 
-    def handle_JMP(self, register, _):
+    def handle_JMP(self, register, _, _2):
         self.pc = self.reg[register]
 
-    def handle_JEQ(self, register, _):
+    def handle_JEQ(self, register, _, _2):
         if self.flags[self.flag_equal] == 1:
             self.handle_JMP(register, _)
         else:
             self.pc += 2
 
-    def handle_JNE(self, register, _):
+    def handle_JNE(self, register, _, _2):
         if self.flags[self.flag_equal] == 0:
             self.handle_JMP(register, _)
         else:
             self.pc += 2
+
+    def handle_ADDI(self, destination, register, data):
+        self.reg[destination] = self.reg[register] + data
 
     # review interview questions
     def run(self):
@@ -323,8 +328,9 @@ class CPU:
 
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
+            operand_c = self.ram_read(self.pc + 3)
             try:
-                self.branchtable[IR](operand_a, operand_b)
+                self.branchtable[IR](operand_a, operand_b, operand_c)
             except:
                 print(f"Invalid instruction {bin(IR)}")
                 sys.exit()
