@@ -39,6 +39,42 @@ PRA = 0b01001000
 CALL = 0b01010000
 RET = 0b00010001
 
+JMP = 0b01010100
+JEQ = 0b01010101
+JNE = 0b01010110
+
+# add instruction map for easier debugging
+instructions = {
+    0b10100000: "ADD",
+    0b10100001: "SUB",
+    0b10100010: "MUL",
+    0b10100011: "DIV",
+    0b10100100: "MOD",
+    0b01100101: "INC",
+    0b01100110: "DEC",
+    0b10100111: "CMP",
+    0b10101000: "AND",
+    0b01101001: "NOT",
+    0b10101010: "OR",
+    0b10101011: "XOR",
+    0b10101100: "SHL",
+    0b10101101: "SHR",
+    0b00000000: "NOP",
+    0b00000001: "HLT",
+    0b10000010: "LDI",
+    0b10000011: "LD",
+    0b10000100: "ST",
+    0b01000101: "PUSH",
+    0b01000110: "POP",
+    0b01000111: "PRN",
+    0b01001000: "PRA",
+    0b01010000: "CALL",
+    0b00010001: "RET",
+    0b01010100: "JMP",
+    0b01010101: "JEQ",
+    0b01010110: "JNE",
+}
+
 
 class CPU:
     """Main CPU class."""
@@ -81,6 +117,9 @@ class CPU:
         self.branchtable[PRA] = self.handle_PRA
         self.branchtable[CALL] = self.handle_CALL
         self.branchtable[RET] = self.handle_RET
+        self.branchtable[JMP] = self.handle_JMP
+        self.branchtable[JEQ] = self.handle_JEQ
+        self.branchtable[JNE] = self.handle_JNE
 
     def load(self):
         """Load a program into memory."""
@@ -108,13 +147,13 @@ class CPU:
         elif op == "MUL":
             self.reg[reg_a] = self.reg[reg_a] * self.reg[reg_b]
         elif op == "CMP":
-            if reg_a == reg_b:
+            if self.reg[reg_a] == self.reg[reg_b]:
                 self.flags[self.flag_equal] = 1
 
-            elif reg_a < reg_b:
+            elif self.reg[reg_a] < self.reg[reg_b]:
                 self.flags[self.flag_lt] = 1
 
-            elif reg_a > reg_b:
+            elif self.reg[reg_a] > self.reg[reg_b]:
                 self.flags[self.flag_gt] = 1
 
             else:
@@ -238,6 +277,21 @@ class CPU:
         register = 0
         self.handle_POP(register, __)
         self.pc = self.reg[register]
+
+    def handle_JMP(self, register, _):
+        self.pc = self.reg[register]
+
+    def handle_JEQ(self, register, _):
+        if self.flags[self.flag_equal] == 1:
+            self.handle_JMP(register, _)
+        else:
+            self.pc += 2
+
+    def handle_JNE(self, register, _):
+        if self.flags[self.flag_equal] == 0:
+            self.handle_JMP(register, _)
+        else:
+            self.pc += 2
 
     # review interview questions
     def run(self):
