@@ -236,7 +236,7 @@ class CPU:
         pass
 
     def handle_MOD(self, operand_a, operand_b, _):
-        pass
+        self.alu("MOD", operand_a, operand_b)
 
     def handle_INC(self, operand_a, operand_b, _):
         pass
@@ -248,22 +248,22 @@ class CPU:
         self.alu("CMP", operand_a, operand_b)
 
     def handle_AND(self, operand_a, operand_b, _):
-        pass
+        self.alu("AND", operand_a, operand_b)
 
     def handle_NOT(self, operand_a, operand_b, _):
-        pass
+        self.alu("NOT", operand_a, operand_b)
 
     def handle_OR(self, operand_a, operand_b, _):
-        pass
+        self.alu("OR", operand_a, operand_b)
 
     def handle_XOR(self, operand_a, operand_b, _):
-        pass
+        self.alu("XOR", operand_a, operand_b)
 
     def handle_SHL(self, operand_a, operand_b, _):
-        pass
+        self.alu("SHL", operand_a, operand_b)
 
     def handle_SHR(self, operand_a, operand_b, _):
-        pass
+        self.alu("SHR", operand_a, operand_b)
 
     def handle_NOP(self, operand_a, operand_b, _):
         pass
@@ -295,7 +295,7 @@ class CPU:
 
     def handle_RET(self, _, _2, _3):
         register = 0
-        self.handle_POP(register, _2)
+        self.handle_POP(register, _2, _3)
         self.pc = self.reg[register]
 
     def handle_JMP(self, register, _, _2):
@@ -303,13 +303,13 @@ class CPU:
 
     def handle_JEQ(self, register, _, _2):
         if self.flags[self.flag_equal] == 1:
-            self.handle_JMP(register, _)
+            self.handle_JMP(register, _, _2)
         else:
             self.pc += 2
 
     def handle_JNE(self, register, _, _2):
         if self.flags[self.flag_equal] == 0:
-            self.handle_JMP(register, _)
+            self.handle_JMP(register, _, _2)
         else:
             self.pc += 2
 
