@@ -47,6 +47,10 @@ class CPU:
         """Construct a new CPU."""
         self.ram = [0] * 255
         self.reg = [0] * 8
+        self.flags = [0] * 8
+        self.flag_lt = 5
+        self.flag_gt = 6
+        self.flag_equal = 7
         self.pc = 0
         self.stack_pointer = 7
         self.reg[self.stack_pointer] = 0xF4  # stack pointer
@@ -103,6 +107,21 @@ class CPU:
         # elif op == "SUB": etc
         elif op == "MUL":
             self.reg[reg_a] = self.reg[reg_a] * self.reg[reg_b]
+        elif op == "CMP":
+            if reg_a == reg_b:
+                self.flags[self.flag_equal] = 1
+
+            elif reg_a < reg_b:
+                self.flags[self.flag_lt] = 1
+
+            elif reg_a > reg_b:
+                self.flags[self.flag_gt] = 1
+
+            else:
+                self.flags[self.flag_lt] = 0
+                self.flags[self.flag_gt] = 0
+                self.flags[self.flag_equal] = 0
+
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -167,7 +186,7 @@ class CPU:
         pass
 
     def handle_CMP(self, operand_a, operand_b):
-        pass
+        self.alu("CMP", operand_a, operand_b)
 
     def handle_AND(self, operand_a, operand_b):
         pass
